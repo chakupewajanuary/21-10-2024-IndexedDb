@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    DB <input type="text" value='notes' id='textDB'>
+    Version <input type="text" value='1' id="textversion">
+    <button id="btnCreateDb">Create Db</button>
+    <!-- for the transaction -->
+    <button id="btnaddNote">AddNote</button>
+    <!-- view notes  -->
+     <button id="btnViewNote">view Note</button>
+
+    <script>
+
+        // grobal varriable
+        let db=null
+        
+        // for the button of the transaction
+        const btnAddNote=document.getElementById("btnaddNote")
+        btnAddNote.addEventListener("click", addNote)
+         
+        // Button to trigger the viewNote function
+         const btnViewNotes = document.getElementById("btnViewNote");
+         btnViewNotes.addEventListener("click", viewNote);
+
+        // for the button of the version
+       const btnCreateDb = document.getElementById("btnCreateDb");
+        btnCreateDb.addEventListener("click", createDb);
+
+
+  // Function to view all notes using a cursor
+    function viewNote() {
+        if (!db) {
+            alert("Database is not initialized. Please create the database first.");
+            return;
+        }
+
+        // Create a transaction in readonly mode
+        const tx = db.transaction("Personal_note", "readonly");
+
+        // Get the object store from the transaction
+        const Pnotes = tx.objectStore("Personal_note");
+
+        // Open a cursor to iterate through all records in the object store
+        const request = Pnotes.openCursor();
+
+        request.onsuccess = e => {
+            const cursor = e.target.result;
+
+            if (cursor) {
+                // Log or display the note for each cursor item
+                alert(`Note :  ${cursor.key}  Text : ${cursor.value.text}`)
+                console.log("Title:", cursor.value.title, "Text:", cursor.value.text);
+
+                // Continue to the next record in the object store
+                cursor.continue();
+            } else {
+                // No more records to process
+                console.log("All notes have been displayed.");
+            }
+        };
+
+        request.onerror = e => {
+            console.error("Error while fetching notes:", e.target.error);
+        };
+    }
+
+        // function for the version a
+        function createDb() {
+            // should work if element exists
+            const Dbname = document.getElementById("textDB").value;
+            // should work if element exists
+            const DbVersion = parseInt(document.getElementById("textversion").value);
+
+            if (isNaN(DbVersion) || DbVersion <= 0) {
+                alert("Please enter a valid version number.");
+                return;
+            }
+
+            const request = indexedDB.open(Dbname, DbVersion);
+
+            request.onupgradeneeded = e => {
+
+                 db = e.target.result; // Get the database instance
+
+                // Create object stores
+                const pNotes = db.createObjectStore("Personal_note", { keyPath: "title" });
+                const todoNote = db.createObjectStore("Personal_note_1", { keyPath: "title" });
+                const ScapeP = db.createObjectStore("Personal_note_2", { keyPath: "title" });
+                const Leo = db.createObjectStore("Personal_note_3", { keyPath: "title" });
+                
+                alert("Object stores created successfully.");
+            };
+
+            request.onsuccess = e => {
+                 db = e.target.result;
+               
+                alert(`On success is called for ${Dbname} version ${db.version}`);
+            };
+
+            request.onerror = e => {
+                alert(`This Error is called ${e.target.error} was found`);
+            };
+        }
+
+
+
+                // Function to add a note to the "Personal_note" object store
+                function addNote() {
+            if (!db) {
+                alert("Database is not initialized. Please create the database first.");
+                return;
+            }
+
+            const note = {
+                title: 'note' +Math.random(),
+                text: 'This is my note '
+            };
+
+            // Create a transaction in readwrite mode
+            const tx = db.transaction("Personal_note", "readwrite");
+            tx.onerror=e=>alert(` this is the error ${e.target.error}`)
+
+            // Get the object store from the transaction
+            const Pnotes = tx.objectStore("Personal_note");
+
+            // Add the note object to the store
+            const addRequest = Pnotes.add(note);
+
+            // Handle success and error for the add operation
+            addRequest.onsuccess = () => {
+                alert("Note added successfully!");
+            };
+
+            addRequest.onerror = e => {
+                alert(`Error adding note: ${e.target.error}`);
+            };
+        }
+
+
+
+
+
+
+
+
+    //    document.addEventListener("DOMContentLoaded", () => {
+    //         const btnCreateDb = document.getElementById("btnCreateDb");
+    //         btnCreateDb.addEventListener("click", createDb);
+
+    //         function createDb() {
+    //             const Dbname = document.getElementById("textDB").value; // should work if element exists
+    //             const DbVersion = parseInt(document.getElementById("textversion").value); // should work if element exists
+
+    //             if (isNaN(DbVersion) || DbVersion <= 0) {
+    //                 alert("Please enter a valid version number.");
+    //                 return;
+    //             }
+
+    //             const request = indexedDB.open(Dbname, DbVersion);
+
+    //             request.onupgradeneeded = e => {
+    //                 const db = e.target.result;
+    //                 alert(`On success is called databasename: ${Dbname} version: ${db.version}`);
+    //             };
+
+    //             request.onsuccess = e => {
+    //                 const db = e.target.result;
+    //                 alert(`On success is called databasename: ${Dbname} version ${db.version}`);
+    //             };
+
+    //             request.onerror = e => {
+    //                 alert(`This Error is called ${e.target.error} was found`);
+    //             };
+    //         }
+    //     });
+    </script>
+</body>
+</html>
