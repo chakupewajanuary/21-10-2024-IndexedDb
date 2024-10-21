@@ -50,7 +50,6 @@
 
         request.onsuccess = e => {
             const cursor = e.target.result;
-
             if (cursor) {
                 // Log or display the note for each cursor item
                 alert(`Note :  ${cursor.key}  Text : ${cursor.value.text}`)
