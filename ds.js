@@ -1,34 +1,22 @@
+let my;
 
-    // const Dbname = document.getElementById('textDB');
-    // const DbVersion = document.getElementById('textversion');
-    // const btnCreateDb = document.getElementById('btnCreateDb');
+// Open the IndexedDB database
+const j4 = indexedDB.open("Manyaga", 2);
 
-    // // for the trial in alternative way
-    // const Dataname=document.querySelector('#textDB')
-    // const Dateversion=document.querySelector('textversion')
-    // const Datesname=document.querySelector('#btnCreateDb')
+// Handle database upgrades (e.g., when the version changes)
+j4.onupgradeneeded = e => {
+    my = e.target.result; // Get the database instance
+     my.createObjectStore("Personal_note_1", { keyPath: "name" });
+    console.log("Object store 'Personal_note_1' created");
+};
 
-    // btnCreateDb.addEventListener('click', createDb);
+// Handle successful database opening
+j4.onsuccess = e => {
+    my = e.target.result; // Get the database instance
+    console.log("Database opened successfully");
+};
 
-    // function createDb() {
-    //     const dbNameValue = Dbname.value;
-    //     const dbVersionValue = DbVersion.value; // Ensure it's a number
-
-    //     const request = indexedDB.open(dbNameValue, dbVersionValue);
-
-    //     // onupgradeneeded
-    //     request.onupgradeneeded = function(e) {
-    //         alert("Upgrade is called");
-    //     };
-
-    //     // onsuccess
-    //     request.onsuccess = function(e) {
-    //         alert("On success is called");
-    //     };
-
-    //     // onerror
-    //     request.onerror = function(e) {
-    //         alert("Error is called");
-    //     };
-    // }
-
+// Handle database opening errors
+j4.onerror = e => {
+    console.error("Error opening database:", e.target.error);
+};
